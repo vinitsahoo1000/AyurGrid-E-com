@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // ESM Environment Settings
+    "module": "esnext",            // ESM output
+    "target": "esnext",            // modern JS features
+    "moduleResolution": "bundler", // important for ESM resolution
+    "types": [],                   // optional: empty if not using global types
+
+    // Output Options
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // Stricter Typechecking
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "strict": true,
+
+    // JSX (if using React)
+    "jsx": "react-jsx",
+
+    // ESM Enhancements
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}
