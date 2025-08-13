@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  products  Product[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Product {
+  id          Int     @id   @default(autoincrement())
+  name        String
+  description String?
+  imageUrl    String?
+  category    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  admin       Admin     @relation(fields: [adminId], references: [id])
+  adminId     Int
+
+  variants    Variant[]
+  orderItems  OrderItem[]
+  CartItem CartItem[]
+}
+
+
+model Variant {
+  id         Int      @id @default(autoincrement())
+  label      String   // "500g", "1kg"
+  price      Decimal  @db.Decimal(10, 2)
+  stock      Int
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  name        String
+  phone       String
+  email       String?
+  address     String
+  pincode     String?
+  totalAmount Decimal      @db.Decimal(10, 2)
+  paymentId   String?      // Razorpay payment id
+  status      String       @default("pending") // pending, paid, shipped, delivered, cancelled
+  orderItems  OrderItem[]
+  createdAt   DateTime     @default(now())
+}
+
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2) // unit price at time of purchase
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  variant   Variant? @relation(fields: [variantId], references: [id])
+  variantId Int?
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int
+}
+
+
+model Cart {
+  id         Int        @id @default(autoincrement())
+  sessionId  String     @unique // keep in cookie
+  items      CartItem[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  status     String     @default("active")
+}
+
+
+model CartItem {
+  id         Int      @id @default(autoincrement())
+  quantity   Int
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  variant    Variant? @relation(fields: [variantId], references: [id])
+  variantId  Int?
+  cart       Cart     @relation(fields: [cartId], references: [id])
+  cartId     Int
+
+  @@unique([cartId, productId, variantId]) // one line item per product+variant
+}
